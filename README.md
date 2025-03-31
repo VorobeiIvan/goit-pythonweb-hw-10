@@ -1,57 +1,175 @@
-# 🧠 FastAPI + PostgreSQL App
+```markdown
+<!-- README.md -->
+# 🧠 Додаток FastAPI + PostgreSQL
 
-This is a web application built with FastAPI and PostgreSQL, fully containerized using Docker Compose. It supports hot-reloading for development and follows a modular structure for scalability.
+Це веб-додаток, створений за допомогою FastAPI та PostgreSQL, повністю контейнеризований за допомогою Docker Compose. Він підтримує гаряче перезавантаження для розробки та має модульну структуру для масштабованості.
 
-## 🚀 Tech Stack
+## 🚀 Технологічний стек
 
-- FastAPI – modern, high-performance web framework for APIs
-- PostgreSQL – relational database
-- Docker & Docker Compose – containerized development
-- SQLAlchemy – ORM for database interactions
-- Pydantic – data validation and serialization
+- **FastAPI** – сучасний, високопродуктивний веб-фреймворк для створення API.
+- **PostgreSQL** – реляційна база даних.
+- **Docker та Docker Compose** – контейнеризація додатка для зручності розгортання.
+- **SQLAlchemy** – ORM для зручної роботи з базою даних.
+- **Pydantic** – валідація та серіалізація даних.
+- **Cloudinary** – збереження медіафайлів.
+- **Python-dotenv** – для завантаження змінних середовища.
 
-## ⚙️ Setup Instructions
+---
 
-1. Clone the repository
+## ⚙️ Інструкції з налаштування
 
+### 1️⃣ Клонування репозиторія
+```bash
 git clone https://github.com/your-repository/goit-pythonweb-hw-10
 cd goit-pythonweb-hw-10
+```
 
-2. Configure environment variables
+### 2️⃣ Налаштування змінних середовища
+Скопіюйте приклад файлу змінних середовища:
 
-Copy the example environment file:
-
+```bash
 cp .env.example .env
+```
 
-Then edit .env with your values:
+Потім заповніть `.env` своїми значеннями:
 
-SECRET_KEY=
-DATABASE_URL=
-CLOUDINARY_URL=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-ALGORITHM=
-ACCESS_TOKEN_EXPIRE_MINUTES=
-SMTP_SERVER=
-SMTP_PORT=
-SMTP_EMAIL=
-SMTP_PASSWORD=
-POSTGRES_USER=
-POSTGRES_PASSWORD=
-POSTGRES_DB=
+```
+SECRET_KEY=<Ваш секретний ключ>
+DATABASE_URL=<URL підключення до PostgreSQL>
+CLOUDINARY_URL=<Ваш Cloudinary URL>
+CLOUDINARY_CLOUD_NAME=<Ім'я хмари Cloudinary>
+CLOUDINARY_API_KEY=<Ключ API Cloudinary>
+CLOUDINARY_API_SECRET=<Секрет API Cloudinary>
+ALGORITHM=<Алгоритм для JWT, наприклад HS256>
+ACCESS_TOKEN_EXPIRE_MINUTES=<Час життя токена у хвилинах>
+SMTP_SERVER=<SMTP сервер для email>
+SMTP_PORT=<Порт SMTP>
+SMTP_EMAIL=<Email для відправлення листів>
+SMTP_PASSWORD=<Пароль для email>
+POSTGRES_USER=<Користувач PostgreSQL>
+POSTGRES_PASSWORD=<Пароль PostgreSQL>
+POSTGRES_DB=<Назва бази даних PostgreSQL>
+```
 
-3. Run the project
+### 3️⃣ Запуск проєкту
+Забезпечте, щоб Docker був встановлений на вашій машині. Потім виконайте:
 
+```bash
 docker-compose up --build
+```
 
-The API will be available at: http://localhost:8000
+API буде доступний за адресою: [http://localhost:8000](http://localhost:8000)
 
-## 📫 API Endpoints
+---
 
-FastAPI provides built-in interactive documentation:
+## 📫 API Ендпоінти
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+FastAPI надає інтерактивну документацію, яка доступна за посиланнями:
 
-If you'd like a written list of endpoints with request/response examples, I can auto-generate that for you — just say the word!
+- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
+
+## 🔑 Основні функціональні можливості
+
+- **Авторизація**: Реєстрація, вхід, підтвердження email, генерація токенів доступу.
+- **Робота з контактами**:
+    - Створення, перегляд, оновлення та видалення контактів.
+    - Пошук контактів із днями народження, які наближаються.
+- **Завантаження медіафайлів**: Використання Cloudinary для роботи з аватарками користувачів.
+
+---
+
+## 🧪 Тестування
+
+Додаток підтримує тестування API:
+
+1. Встановіть залежності для тестування:
+
+```bash
+pip install pytest pytest-asyncio
+```
+
+2. Запустіть тести:
+
+```bash
+pytest
+```
+
+---
+
+## 🛠 Форматування коду
+
+Для форматування коду використовуйте `black`:
+
+```bash
+black .
+```
+
+---
+
+## 📂 Структура проєкту
+
+```plaintext
+.
+├── README.md
+├── docker
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── start.sh
+├── env
+│   └── .env.example
+├── requirements.txt
+├── setup.cfg
+└── src
+        ├── config
+        │   ├── config.py              # Конфігурація змінних середовища
+        │   ├── logging_config.py      # Логування
+        │   └── security_config.py     # Безпека (хешування паролів)
+        ├── constants
+        │   ├── auth.py                # Налаштування аутентифікації
+        │   ├── consts.py              # Глобальні константи
+        │   └── security.py            # Безпека
+        ├── database
+        │   └── database.py            # Налаштування бази даних (PostgreSQL)
+        ├── main.py                    # Точка входу до додатку
+        ├── middleware
+        │   └── middleware.py          # Middleware для перевірки змінних середовища
+        ├── models
+        │   └── models.py              # ORM моделі для бази даних
+        ├── routers
+        │   ├── auth.py                # Роутинг для авторизації
+        │   ├── contacts.py            # Роутинг для роботи з контактами
+        │   └── users.py               # Роутинг для профілю користувача
+        ├── schemas
+        │   └── contact.py             # Pydantic-схеми
+        ├── utils
+        │   ├── auth
+        │   │   ├── auth_utils.py      # Допоміжні функції для авторизації
+        │   │   ├── passwords.py       # Хешування паролів
+        │   │   └── tokens.py          # Генерація та валідація токенів
+        │   ├── db
+        │   │   └── sessions.py        # Сесії бази даних
+        │   ├── email
+        │   │   └── send_email.py      # Відправка листів
+        │   └── key_generator.py       # Генерація ключів
+        └── validators
+                ├── validate_birthday.py   # Валідація дати народження
+                └── validate_phone_number.py # Валідація номерів телефонів
+```
+
+---
+
+## 🛡 Безпека
+
+- Використання `bcrypt` для хешування паролів.
+- JWT для автентифікації користувачів.
+- Перевірка змінних середовища під час запуску додатка.
+
+---
+
+## 📧 Контакти
+
+Якщо у вас є запитання чи пропозиції, напишіть на `your-email@example.com`.
+```

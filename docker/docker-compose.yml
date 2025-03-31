@@ -1,0 +1,47 @@
+# Файл docker-compose.yml для налаштування сервісів у Docker.
+# Цей файл описує два сервіси: базу даних PostgreSQL (db) та веб-додаток FastAPI (web).
+
+services:
+  db:
+    # Сервіс бази даних PostgreSQL.
+    # Використовується офіційний образ PostgreSQL версії 15.
+    image: postgres:15
+    container_name: postgres_db  # Ім'я контейнера для зручності.
+    restart: always  # Автоматичний перезапуск контейнера у разі збою.
+    env_file:
+      - .env  # Файл з середовищними змінними для конфігурації PostgreSQL.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}  # Ім'я користувача PostgreSQL.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Пароль для користувача PostgreSQL.
+      POSTGRES_DB: ${POSTGRES_DB}  # Назва бази даних PostgreSQL.
+    ports:
+      - "5432:5432"  # Проброс порту для доступу до PostgreSQL з хоста.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Збереження даних бази у volume.
+    healthcheck:
+      # Перевірка стану сервісу PostgreSQL.
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s  # Інтервал між перевірками.
+      retries: 5  # Кількість спроб перед визнанням сервісу недоступним.
+
+  web:
+    # Сервіс веб-додатку FastAPI.
+    build: .  # Збірка образу з Dockerfile у поточній директорії.
+    container_name: fastapi_app  # Ім'я контейнера для зручності.
+    restart: always  # Автоматичний перезапуск контейнера у разі збою.
+    depends_on:
+      db:
+        condition: service_healthy  # Залежність від сервісу db, який має бути у стані "healthy".
+    env_file:
+      - .env  # Файл з середовищними змінними для конфігурації веб-додатку.
+    environment:
+      DATABASE_URL: ${DATABASE_URL}  # URL для підключення до бази даних.
+    ports:
+      - "8000:8000"  # Проброс порту для доступу до веб-додатку з хоста.
+    volumes:
+      - ./src:/app  # Прив'язка локальної директорії src до директорії /app у контейнері.
+    command: ["/start.sh"]  # Команда для запуску веб-додатку.
+
+volumes:
+  postgres_data:
+    # Volume для збереження даних PostgreSQL.

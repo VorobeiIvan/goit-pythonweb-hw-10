@@ -1,15 +1,26 @@
+# FastAPI Framework
 fastapi~=0.115.11
-uvicorn
+uvicorn~=0.22.0
+starlette~=0.46.1
+
+# Database
 sqlalchemy~=2.0.39
 psycopg2
-pydantic~=2.10.6
 psycopg2-binary
+
+# Security
 python-jose~=3.4.0
 passlib~=1.7.4
+bcrypt
+
+# Validation
 pydantic[email]
+pydantic~=2.10.6
+
+# File and Environment Management
 python-multipart
-starlette~=0.46.1
-slowapi~=0.1.9
 cloudinary~=1.43.0
 python-dotenv~=1.0.1
-bcrypt
+
+# Rate Limiting
+slowapi~=0.1.9
