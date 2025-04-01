@@ -22,7 +22,7 @@ services:
 
   web:
     build:
-      context: ..
+      context: ../
       dockerfile: docker/Dockerfile
     container_name: fastapi_app
     restart: always
@@ -32,12 +32,12 @@ services:
     env_file:
       - ../env/.env
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      MODE: ${MODE}
     ports:
       - "8000:8000"
     volumes:
-      - ./src:/app
-    command: ["/app/start.sh"]
+      - ../src:/app/src
+    command: ["sh", "-c", "/app/start.sh"]
 
 volumes:
   postgres_data:

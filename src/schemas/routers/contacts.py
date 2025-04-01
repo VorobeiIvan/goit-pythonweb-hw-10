@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.services.contacts import create_contact, get_contacts, get_upcoming_birthdays
 from src.utils.auth.auth_utils import get_current_user
 from src.utils.db.sessions import get_db
-from src.models.models import ContactCreate, ContactResponse
+from src.schemas.contact import ContactCreate, ContactResponse
 from typing import List
 
 router = APIRouter(prefix="/contacts", tags=["Контакти"])
@@ -15,14 +15,26 @@ def create(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    return create_contact(contact, current_user, db)
+    """
+    Створення нового контакту.
+    """
+    created_contact = create_contact(contact, current_user, db)
+    return ContactResponse.from_orm(created_contact)
 
 
 @router.get("/", response_model=List[ContactResponse])
 def read_all(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return get_contacts(current_user, db)
+    """
+    Отримання всіх контактів для поточного користувача.
+    """
+    contacts = get_contacts(current_user, db)
+    return [ContactResponse.from_orm(contact) for contact in contacts]
 
 
 @router.get("/upcoming_birthdays/", response_model=List[ContactResponse])
 def upcoming(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return get_upcoming_birthdays(current_user, db)
+    """
+    Отримання контактів з найближчими днями народження.
+    """
+    birthdays = get_upcoming_birthdays(current_user, db)
+    return [ContactResponse.from_orm(contact) for contact in birthdays]

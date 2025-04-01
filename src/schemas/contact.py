@@ -3,8 +3,8 @@ from datetime import date, datetime
 from typing import Optional, List
 from uuid import UUID
 from enum import Enum
-from validators.validate_phone_number import validate_phone_number
-from validators.validate_birthday import validate_birthday
+from src.validators.validate_phone_number import validate_phone_number
+from src.validators.validate_birthday import validate_birthday
 
 
 class ContactStatus(str, Enum):
@@ -87,12 +87,12 @@ class ContactCreate(ContactBase):
     pass
 
 
-class Contact(ContactBase):
+class ContactResponse(ContactBase):
     """
-    Розширена модель контакту, що включає ідентифікатор.
+    Розширена модель відповіді для контакту.
     """
 
     id: UUID  # Унікальний ідентифікатор контакту
 
     class Config:
-        from_attributes = True  # Дозволяє використовувати ORM-об'єкти
+        from_attributes = True  # Замість застарілого orm_mode

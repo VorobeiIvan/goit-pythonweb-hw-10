@@ -6,12 +6,12 @@ RUN useradd -m appuser
 
 WORKDIR /app
 
-COPY ../requirements.txt /tmp/
+COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY . .
 
-RUN chmod +x /app/start.sh
+RUN chmod +x start.sh
 RUN chown -R appuser:appuser /app
 
 USER appuser

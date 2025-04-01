@@ -1,5 +1,5 @@
-from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from .logger import logger
+from src.config.app_config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from src.config.logging_config import logger
 from .security import pwd_context
 from .auth import oauth2_scheme
 
