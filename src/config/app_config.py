@@ -12,7 +12,9 @@ required_env_vars = [
     "POSTGRES_HOST",
     "POSTGRES_PORT",
     "POSTGRES_DB",
-    "CLOUDINARY_URL",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_CLOUD_NAME",
     "SMTP_SERVER",
     "SMTP_PORT",
 ]
@@ -26,6 +28,10 @@ for var in required_env_vars:
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
     f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+)
+CLOUDINARY_URL = (
+    f"cloudinary://{os.getenv('CLOUDINARY_API_KEY')}:{os.getenv('CLOUDINARY_API_SECRET')}"
+    f"@{os.getenv('CLOUDINARY_CLOUD_NAME')}"
 )
 
 # Логування успішного завантаження

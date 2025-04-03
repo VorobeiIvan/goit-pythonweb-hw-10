@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 # Завантаження змінних середовища з файлу .env
 load_dotenv()
 
+print("POSTGRES_USER:", os.getenv("POSTGRES_USER"))
+print("POSTGRES_PASSWORD:", os.getenv("POSTGRES_PASSWORD"))
+print("POSTGRES_DB:", os.getenv("POSTGRES_DB"))
+
 # Динамічне формування DATABASE_URL
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
