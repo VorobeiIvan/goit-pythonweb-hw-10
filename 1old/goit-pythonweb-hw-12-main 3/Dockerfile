@@ -2,10 +2,9 @@ FROM python:3.11
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies for Sphinx
 RUN apt-get update && apt-get install -y \
     make \
-    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
