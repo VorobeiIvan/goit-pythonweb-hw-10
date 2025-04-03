@@ -4,7 +4,7 @@ services:
     container_name: postgres_db
     restart: always
     env_file:
-      - ./.env  # Оновлено шлях
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -13,29 +13,23 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: fastapi_app
     restart: always
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     env_file:
-      - ./.env  # Оновлено шлях
+      - .env
     environment:
-      MODE: ${MODE}
+      DATABASE_URL: ${DATABASE_URL}
     ports:
-      - "8000:8000"
+      - "8000:8000"  # API port
+      - "8080:8080"  # Documentation port
     volumes:
-      - ./src:/app/src
-    command: ["sh", "-c", "/app/start.sh"]
+      - ./docs:/app/docs  # Mount docs directory for live updates
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 volumes:
   postgres_data:

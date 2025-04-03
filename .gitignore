@@ -1,12 +1,15 @@
-# Файли, згенеровані Python
+.idea
+.venv
 __pycache__/
-*.py[cod]
-*$py.class
+.env
 
-# Розширення C
-*.so
-
-# Файли, пов'язані з дистрибуцією та пакуванням
+# Sphinx documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+*.pyc
+*.pyo
+*.pyd
 .Python
 build/
 develop-eggs/
@@ -20,98 +23,14 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Логи інсталятора
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Звіти тестування та покриття
+# Coverage
 htmlcov/
-.tox/
-.nox/
 .coverage
 .coverage.*
-.cache
-nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Файли перекладів
-*.mo
-*.pot
-
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask
-instance/
-.webassets-cache
-
-# Scrapy
-.scrapy
-
-# Документація Sphinx
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-.pdm-python
-.pdm-build/
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath
-*.sage.py
-
-# Віртуальні середовища
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder
-.spyderproject

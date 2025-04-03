@@ -1,175 +1,215 @@
-```markdown
-<!-- README.md -->
-# 🧠 Додаток FastAPI + PostgreSQL
+# FastAPI Contacts Management API
 
-Це веб-додаток, створений за допомогою FastAPI та PostgreSQL, повністю контейнеризований за допомогою Docker Compose. Він підтримує гаряче перезавантаження для розробки та має модульну структуру для масштабованості.
+## 🚀 Overview
+This project is a **FastAPI-based REST API** that allows users to manage their contacts. It includes features such as authentication, email verification, JWT authorization, rate limiting, and avatar uploading via Cloudinary.
 
-## 🚀 Технологічний стек
+## 📌 Features
+- **User Authentication & Authorization** (JWT-based)
+- **User Registration with Email Verification**
+- **CRUD Operations for Contacts**
+- **Rate Limiting** (SlowAPI)
+- **CORS Support**
+- **Cloudinary Integration for Avatar Uploads**
+- **Docker & PostgreSQL Support**
+- **Redis Caching**
+- **Password Reset Functionality**
+- **User Roles (Admin/User)**
+- **Sphinx Documentation**
 
-- **FastAPI** – сучасний, високопродуктивний веб-фреймворк для створення API.
-- **PostgreSQL** – реляційна база даних.
-- **Docker та Docker Compose** – контейнеризація додатка для зручності розгортання.
-- **SQLAlchemy** – ORM для зручної роботи з базою даних.
-- **Pydantic** – валідація та серіалізація даних.
-- **Cloudinary** – збереження медіафайлів.
-- **Python-dotenv** – для завантаження змінних середовища.
+## 🛠 Tech Stack
+- **Python 3.11**
+- **FastAPI**
+- **SQLAlchemy** (PostgreSQL)
+- **JWT (PyJWT & OAuth2)**
+- **Passlib (Password Hashing)**
+- **Cloudinary (Image Uploads)**
+- **Docker & Docker Compose**
+- **SlowAPI (Rate Limiting)**
+- **Redis (Caching)**
+- **Sphinx (Documentation)**
 
----
+## 🔧 Installation & Setup
 
-## ⚙️ Інструкції з налаштування
-
-### 1️⃣ Клонування репозиторія
+### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-repository/goit-pythonweb-hw-10
-cd goit-pythonweb-hw-10
+git clone https://github.com/your-repository/your-repository
+cd your-repository
 ```
 
-### 2️⃣ Налаштування змінних середовища
-Скопіюйте приклад файлу змінних середовища:
-
+### 2️⃣ Create a Virtual Environment & Install Dependencies
 ```bash
-cp .env.example .env
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
 ```
 
-Потім заповніть `.env` своїми значеннями:
-
-```
-SECRET_KEY=<Ваш секретний ключ>
-DATABASE_URL=<URL підключення до PostgreSQL>
-CLOUDINARY_URL=<Ваш Cloudinary URL>
-CLOUDINARY_CLOUD_NAME=<Ім'я хмари Cloudinary>
-CLOUDINARY_API_KEY=<Ключ API Cloudinary>
-CLOUDINARY_API_SECRET=<Секрет API Cloudinary>
-ALGORITHM=<Алгоритм для JWT, наприклад HS256>
-ACCESS_TOKEN_EXPIRE_MINUTES=<Час життя токена у хвилинах>
-SMTP_SERVER=<SMTP сервер для email>
-SMTP_PORT=<Порт SMTP>
-SMTP_EMAIL=<Email для відправлення листів>
-SMTP_PASSWORD=<Пароль для email>
-POSTGRES_USER=<Користувач PostgreSQL>
-POSTGRES_PASSWORD=<Пароль PostgreSQL>
-POSTGRES_DB=<Назва бази даних PostgreSQL>
+### 3️⃣ Set Up Environment Variables
+Create a `.env` file and add:
+```env
+SECRET_KEY=
+ACCESS_TOKEN_EXPIRE_MINUTES=
+DATABASE_URL=
+SMTP_SERVER=
+SMTP_PORT=
+SMTP_EMAIL=
+SMTP_PASSWORD=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+REDIS_HOST=
+REDIS_PORT=
 ```
 
-### 3️⃣ Запуск проєкту
-Забезпечте, щоб Docker був встановлений на вашій машині. Потім виконайте:
-
+### 4️⃣ Run with Docker Compose
 ```bash
 docker-compose up --build
 ```
 
-API буде доступний за адресою: [http://localhost:8000](http://localhost:8000)
-
----
-
-## 📫 API Ендпоінти
-
-FastAPI надає інтерактивну документацію, яка доступна за посиланнями:
-
-- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-
----
-
-## 🔑 Основні функціональні можливості
-
-- **Авторизація**: Реєстрація, вхід, підтвердження email, генерація токенів доступу.
-- **Робота з контактами**:
-    - Створення, перегляд, оновлення та видалення контактів.
-    - Пошук контактів із днями народження, які наближаються.
-- **Завантаження медіафайлів**: Використання Cloudinary для роботи з аватарками користувачів.
-
----
-
-## 🧪 Тестування
-
-Додаток підтримує тестування API:
-
-1. Встановіть залежності для тестування:
-
+### 5️⃣ Run PostgreSQL & Redis Locally (without Docker Compose)
+If using Docker manually, run:
 ```bash
-pip install pytest pytest-asyncio
+# PostgreSQL
+docker run --name fastapi_db -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+
+# Redis
+docker run --name fastapi_redis -p 6379:6379 -d redis
 ```
-
-2. Запустіть тести:
-
+Or start existing containers:
 ```bash
-pytest
+docker start fastapi_db fastapi_redis
 ```
 
----
-
-## 🛠 Форматування коду
-
-Для форматування коду використовуйте `black`:
-
+### 6️⃣ Run FastAPI Server
 ```bash
-black .
+uvicorn main:app --reload
+```
+The API will be available at: `http://127.0.0.1:8000`
+
+## 📜 API Documentation
+
+### Interactive Documentation
+- **Swagger UI:** `http://127.0.0.1:8000/docs`
+- **ReDoc:** `http://127.0.0.1:8000/redoc`
+
+### Generated Documentation
+To generate and view the Sphinx documentation:
+```bash
+cd docs
+make html
+```
+The documentation will be available in `docs/_build/html/index.html`
+
+## 🧪 Testing
+
+### Running Tests
+To run the tests with coverage reporting:
+```bash
+PYTHONPATH=$PYTHONPATH:. pytest tests/ -v --cov=. --cov-report=term-missing
 ```
 
----
+### Test Coverage
+Current test coverage:
+- Overall: 84%
+- `database.py`: 92%
+- `main.py`: 69%
+- `models.py`: 100%
+- `tests/conftest.py`: 100%
+- `tests/test_auth.py`: 100%
+- `tests/test_contacts.py`: 100%
 
-## 📂 Структура проєкту
+### Test Categories
 
-```plaintext
-.
-├── README.md
-├── docker
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── start.sh
-├── env
-│   └── .env.example
-├── requirements.txt
-├── setup.cfg
-└── src
-        ├── config
-        │   ├── config.py              # Конфігурація змінних середовища
-        │   ├── logging_config.py      # Логування
-        │   └── security_config.py     # Безпека (хешування паролів)
-        ├── constants
-        │   ├── auth.py                # Налаштування аутентифікації
-        │   ├── consts.py              # Глобальні константи
-        │   └── security.py            # Безпека
-        ├── database
-        │   └── database.py            # Налаштування бази даних (PostgreSQL)
-        ├── main.py                    # Точка входу до додатку
-        ├── middleware
-        │   └── middleware.py          # Middleware для перевірки змінних середовища
-        ├── models
-        │   └── models.py              # ORM моделі для бази даних
-        ├── routers
-        │   ├── auth.py                # Роутинг для авторизації
-        │   ├── contacts.py            # Роутинг для роботи з контактами
-        │   └── users.py               # Роутинг для профілю користувача
-        ├── schemas
-        │   └── contact.py             # Pydantic-схеми
-        ├── utils
-        │   ├── auth
-        │   │   ├── auth_utils.py      # Допоміжні функції для авторизації
-        │   │   ├── passwords.py       # Хешування паролів
-        │   │   └── tokens.py          # Генерація та валідація токенів
-        │   ├── db
-        │   │   └── sessions.py        # Сесії бази даних
-        │   ├── email
-        │   │   └── send_email.py      # Відправка листів
-        │   └── key_generator.py       # Генерація ключів
-        └── validators
-                ├── validate_birthday.py   # Валідація дати народження
-                └── validate_phone_number.py # Валідація номерів телефонів
+#### Authentication Tests (`tests/test_auth.py`)
+- Token creation
+- Password verification
+- User registration
+- Duplicate user check
+- Login functionality
+- Invalid credentials handling
+- Current user information
+- Invalid token handling
+- Password reset functionality
+- User role verification
+
+#### Contacts Tests (`tests/test_contacts.py`)
+- Contact creation
+- Contact list retrieval
+- Single contact retrieval
+- Contact update
+- Contact deletion
+- Unauthorized access handling
+- Non-existent contact handling
+
+## 🔐 Authentication & Authorization
+
+### User Roles
+- **User**: Standard user with basic access
+- **Admin**: Administrator with additional privileges
+   - Can change their avatar
+   - Has full access to all features
+
+### Password Reset
+1. Request password reset:
+    ```bash
+    POST /forgot-password/
+    ```
+2. Check email for reset link
+3. Reset password using the token:
+    ```bash
+    POST /reset-password/{token}
+    ```
+
+### Redis Caching
+- User data is cached in Redis for 30 minutes
+- Cache is automatically updated when user data changes
+- Improves performance by reducing database queries
+
+## 🛠 Development
+
+### Code Style
+The project follows PEP 8 guidelines. To check code style:
+```bash
+flake8 .
 ```
 
----
-
-## 🛡 Безпека
-
-- Використання `bcrypt` для хешування паролів.
-- JWT для автентифікації користувачів.
-- Перевірка змінних середовища під час запуску додатка.
-
----
-
-## 📧 Контакти
-
-Якщо у вас є запитання чи пропозиції, напишіть на `your-email@example.com`.
+### Documentation
+All functions and classes have docstrings following Google style. To generate documentation:
+```bash
+cd docs
+make html
 ```
+
+### Testing
+To run specific test files:
+```bash
+PYTHONPATH=$PYTHONPATH:. pytest tests/test_auth.py -v
+```
+
+To run a specific test:
+```bash
+PYTHONPATH=$PYTHONPATH:. pytest tests/test_auth.py::test_login_success -v
+```
+
+## 📦 Dependencies
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Redis
+- JWT
+- Passlib
+- Cloudinary
+- Sphinx
+- pytest
+- pytest-cov
+- flake8
+
+## 🔒 Security
+- JWT-based authentication
+- Password hashing with bcrypt
+- Rate limiting
+- CORS protection
+- Email verification
+- Role-based access control
+
+## 📝 License
+This project is licensed under the MIT License - see the LICENSE file for details.
