@@ -34,4 +34,10 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover
+
+*.pot
+*.mo
+*.po
 .DS_Store
+*.log
+
