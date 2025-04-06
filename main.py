@@ -1,46 +1,39 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter
-from slowapi.middleware import SlowAPIMiddleware
-from slowapi.errors import RateLimitExceeded
-from fastapi.responses import JSONResponse
-from app.database.database import Base, engine
-from app.routers import auth, contacts, users
+from app.core.middleware import add_middlewares
+from app.core.exception_handlers import add_exception_handlers
+from app.core.routers import add_routers
+from app.core.startup import initialize_database
+import logging
+
+# Ініціалізація логування
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Ініціалізація FastAPI
 app = FastAPI()
-
-# Ініціалізація Limiter
-limiter = Limiter(key_func=lambda request: request.client.host)
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
-
-
-# Обробка перевищення ліміту
-@app.exception_handler(RateLimitExceeded)
-async def rate_limit_exceeded_handler(request, exc):
-    return JSONResponse(
-        status_code=429,
-        content={"detail": "Rate limit exceeded. Try again later."},
-    )
 
 
 # Подія для створення таблиць у базі даних під час запуску
 @app.on_event("startup")
 async def startup():
-    Base.metadata.create_all(bind=engine)
+    logger.info("Starting application...")
+    initialize_database()
+    logger.info("Application started successfully.")
 
 
-# Додавання CORS Middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint to verify the application is running.
 
-# Підключення роутерів
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(contacts.router, prefix="/contacts", tags=["Contacts"])
-app.include_router(users.router, prefix="/users", tags=["Users"])
+    Returns:
+        dict: A dictionary with the status of the application.
+    """
+    logger.info("Health check endpoint called.")
+    return {"status": "ok"}
+
+
+# Виклик функцій
+add_middlewares(app)
+add_exception_handlers(app)
+add_routers(app)

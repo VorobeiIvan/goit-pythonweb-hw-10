@@ -1,6 +1,8 @@
 Register User
 =============
 
+This endpoint allows a new user to register by providing their email and password.
+
 .. http:post:: /api/auth/register
 
    Register a new user.
@@ -29,4 +31,13 @@ Register User
 
    :statuscode 201: User successfully created
    :statuscode 400: Email already registered
-   :statuscode 422: Validation Error 
+   :statuscode 422: Validation Error
+
+Notes
+-----
+
+- The `email` field must be unique and in a valid email format.
+- The `password` field must meet the application's password complexity requirements.
+- If the email is already registered, the API will return a `400` status code.
+
+

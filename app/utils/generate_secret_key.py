@@ -1,7 +1,12 @@
 import secrets
+import logging
+
+# Налаштування логування
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def generate_secret_key():
+def generate_secret_key() -> str:
     """
     Generate a long, random, and unique secret key.
 
@@ -12,20 +17,9 @@ def generate_secret_key():
     Returns:
         str: A randomly generated secret key.
 
-    How to use `generate_secret_key.py`:
-    1. Open a terminal in the root directory of your project.
-    2. Run the script using the command:
-       python /path/to/generate_secret_key.py
-    3. The script will output a generated secret key to the console. For example:
-       Your generated SECRET_KEY:
-       abc123... (randomly generated string)
-    4. Copy the generated key and paste it into your `.env` file under the variable `SECRET_KEY`. For example:
-       SECRET_KEY=abc123...
-    5. Ensure your application uses this key for cryptographic operations, such as token encryption.
-
-    Why is this important?
-    - **Security**: The secret key is used for encrypting tokens (e.g., JWT) and ensuring the security of your application.
-    - **Uniqueness**: Each application should have its own unique secret key to prevent compromise.
+    Example usage:
+        >>> secret_key = generate_secret_key()
+        >>> print(secret_key)
     """
     # Generate a secure, random, URL-safe string of 32 characters
     return secrets.token_urlsafe(32)
@@ -33,7 +27,14 @@ def generate_secret_key():
 
 if __name__ == "__main__":
     # Print a message to indicate the purpose of the script
-    print("Your generated SECRET_KEY:")
+    logger.info("Generating a new SECRET_KEY...")
 
     # Generate and print the secret key to the console
-    print(generate_secret_key())
+    secret_key = generate_secret_key()
+    logger.info("Your generated SECRET_KEY:")
+    print(secret_key)
+
+    # Provide instructions for the user
+    logger.info(
+        "Copy the above SECRET_KEY and paste it into your `.env` file under the variable `SECRET_KEY`."
+    )

@@ -1,10 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Enum, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel, EmailStr
-from typing import Optional
 import enum
 from datetime import datetime
-
 from app.database.database import Base
 
 
@@ -34,13 +31,19 @@ class User(Base):
     """
 
     __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
-    role = Column(String, default="user")
+    role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
     contacts = relationship("Contact", back_populates="owner")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Avoid indexing duplicate attributes in Sphinx
+    """
+    :no-index:
+    """

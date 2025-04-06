@@ -1,6 +1,10 @@
 import smtplib
 from email.message import EmailMessage
 import os
+import logging
+
+# Налаштування логування
+logger = logging.getLogger(__name__)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
@@ -22,10 +26,16 @@ def send_verification_email(email: str, token: str):
         f"Please verify your email by clicking the link: {verification_url}"
     )
 
-    with smtplib.SMTP(os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT"))) as server:
-        server.starttls()
-        server.login(os.getenv("SMTP_EMAIL"), os.getenv("SMTP_PASSWORD"))
-        server.send_message(msg)
+    try:
+        with smtplib.SMTP(
+            os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT"))
+        ) as server:
+            server.starttls()
+            server.login(os.getenv("SMTP_EMAIL"), os.getenv("SMTP_PASSWORD"))
+            server.send_message(msg)
+        logger.info(f"Verification email sent to {email}")
+    except Exception as e:
+        logger.error(f"Failed to send verification email to {email}: {e}")
 
 
 def send_password_reset_email(email: str, token: str):
@@ -43,7 +53,13 @@ def send_password_reset_email(email: str, token: str):
     msg["To"] = email
     msg.set_content(f"Click the link to reset your password: {reset_url}")
 
-    with smtplib.SMTP(os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT"))) as server:
-        server.starttls()
-        server.login(os.getenv("SMTP_EMAIL"), os.getenv("SMTP_PASSWORD"))
-        server.send_message(msg)
+    try:
+        with smtplib.SMTP(
+            os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT"))
+        ) as server:
+            server.starttls()
+            server.login(os.getenv("SMTP_EMAIL"), os.getenv("SMTP_PASSWORD"))
+            server.send_message(msg)
+        logger.info(f"Password reset email sent to {email}")
+    except Exception as e:
+        logger.error(f"Failed to send password reset email to {email}: {e}")

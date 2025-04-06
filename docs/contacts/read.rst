@@ -1,5 +1,7 @@
 Read Contacts
-============
+=============
+
+This section contains endpoints for retrieving contacts.
 
 .. http:get:: /contacts/
 
@@ -11,14 +13,17 @@ Read Contacts
 
    :status 200: Success
    :status 401: Not authenticated
+   :status 403: Forbidden (if the user does not have access)
 
    **Example Request:**
    .. code-block:: http
+
       GET /contacts/?skip=0&limit=10
       Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
    **Example Response:**
    .. code-block:: json
+
       [
          {
             "id": 1,
@@ -42,15 +47,18 @@ Read Contacts
 
    :status 200: Success
    :status 401: Not authenticated
+   :status 403: Forbidden (if the user does not have access)
    :status 404: Contact not found
 
    **Example Request:**
    .. code-block:: http
+
       GET /contacts/1
       Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
    **Example Response:**
    .. code-block:: json
+
       {
          "id": 1,
          "first_name": "John",
@@ -61,4 +69,11 @@ Read Contacts
          "owner_id": 1,
          "created_at": "2024-03-28T10:00:00",
          "updated_at": "2024-03-28T10:00:00"
-      } 
+      }
+
+Notes
+-----
+
+- The `Authorization` header must contain a valid Bearer token.
+- Ensure the user has access to the requested contact before attempting to retrieve it.
+

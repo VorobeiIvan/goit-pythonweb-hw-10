@@ -1,69 +1,96 @@
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
+from unittest.mock import MagicMock, patch
+from app.models.contacts import Contact
 
 client = TestClient(app)
 
 
-@pytest.fixture
-def test_contact_data():
-    """
-    Фікстура для створення тестових даних контакту.
-    """
-    return {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john.doe@example.com",
-        "phone": "1234567890",
-    }
+@patch("app.routers.contacts.get_db")
+def test_create_contact(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_db.add.return_value = None
+    mock_db.commit.return_value = None
+    mock_db.refresh.return_value = None
+
+    response = client.post(
+        "/contacts/",
+        json={
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com",
+            "phone": "123456789",
+            "birthday": "1990-01-01",
+        },
+    )
+    assert response.status_code == 201
 
 
-def test_create_contact(test_contact_data):
-    """
-    Тест для перевірки створення нового контакту.
-    """
-    response = client.post("/contacts/", json=test_contact_data)
-    assert response.status_code == 201, "Contact creation failed"
-    data = response.json()
-    assert "id" in data, "Response does not contain contact ID"
-    assert (
-        data["first_name"] == test_contact_data["first_name"]
-    ), "First name does not match"
-    assert (
-        data["last_name"] == test_contact_data["last_name"]
-    ), "Last name does not match"
-    assert data["email"] == test_contact_data["email"], "Email does not match"
-    assert data["phone"] == test_contact_data["phone"], "Phone does not match"
+@patch("app.routers.contacts.get_db")
+def test_get_contacts(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_db.query.return_value.filter.return_value.all.return_value = [
+        Contact(id=1, first_name="John", last_name="Doe", email="john.doe@example.com")
+    ]
+
+    response = client.get("/contacts/")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
 
 
-def test_get_contact_by_id(test_contact_data):
-    """
-    Тест для перевірки отримання контакту за ID.
-    """
-    # Спочатку створюємо контакт
-    create_response = client.post("/contacts/", json=test_contact_data)
-    contact_id = create_response.json()["id"]
+@patch("app.routers.contacts.get_db")
+def test_get_contact_by_id(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
 
-    # Потім отримуємо контакт за ID
-    response = client.get(f"/contacts/{contact_id}")
-    assert response.status_code == 200, "Failed to fetch contact by ID"
-    data = response.json()
-    assert data["id"] == contact_id, "Contact ID does not match"
-    assert data["email"] == test_contact_data["email"], "Email does not match"
+    mock_db.query.return_value.filter.return_value.first.return_value = Contact(
+        id=1, first_name="John", last_name="Doe", email="john.doe@example.com"
+    )
+
+    response = client.get("/contacts/1")
+    assert response.status_code == 200
+    assert response.json()["id"] == 1
 
 
-def test_delete_contact(test_contact_data):
-    """
-    Тест для перевірки видалення контакту.
-    """
-    # Спочатку створюємо контакт
-    create_response = client.post("/contacts/", json=test_contact_data)
-    contact_id = create_response.json()["id"]
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+from unittest.mock import MagicMock, patch
+from app.models.contacts import Contact
 
-    # Видаляємо контакт
-    delete_response = client.delete(f"/contacts/{contact_id}")
-    assert delete_response.status_code == 204, "Failed to delete contact"
+client = TestClient(app)
 
-    # Перевіряємо, що контакт видалено
-    get_response = client.get(f"/contacts/{contact_id}")
-    assert get_response.status_code == 404, "Contact was not deleted"
+
+@patch("app.routers.contacts.get_db")
+def test_search_contacts(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_db.query.return_value.filter.return_value.all.return_value = [
+        Contact(id=1, first_name="John", last_name="Doe", email="john.doe@example.com")
+    ]
+
+    response = client.get("/contacts/search?query=John")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["first_name"] == "John"
+
+
+@patch("app.routers.contacts.get_db")
+def test_get_upcoming_birthdays(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_db.query.return_value.filter.return_value.all.return_value = [
+        Contact(id=1, first_name="Jane", last_name="Doe", email="jane.doe@example.com")
+    ]
+
+    response = client.get("/contacts/birthdays")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["first_name"] == "Jane"

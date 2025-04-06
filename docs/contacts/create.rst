@@ -1,5 +1,7 @@
 Create Contact
-=============
+==============
+
+This endpoint allows the user to create a new contact by providing the required details.
 
 .. http:post:: /contacts/
 
@@ -14,10 +16,12 @@ Create Contact
 
    :status 200: Contact created successfully
    :status 401: Not authenticated
+   :status 403: Forbidden (if the user does not have permission to create a contact)
    :status 422: Validation error
 
    **Example Request:**
    .. code-block:: http
+
       POST /contacts/
       Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
       Content-Type: application/json
@@ -32,6 +36,7 @@ Create Contact
 
    **Example Response:**
    .. code-block:: json
+
       {
          "id": 1,
          "first_name": "John",
@@ -42,4 +47,12 @@ Create Contact
          "owner_id": 1,
          "created_at": "2024-03-28T10:00:00",
          "updated_at": "2024-03-28T10:00:00"
-      } 
+      }
+
+Notes
+-----
+
+- The `Authorization` header must contain a valid Bearer token.
+- Ensure all required fields are provided in the request body.
+
+

@@ -1,8 +1,13 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from enum import Enum
+import logging
+
+# Налаштування логування
+logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
@@ -16,10 +21,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     role = Column(String, default="user")
-    created_at = Column(DateTime, default=datetime.now(timezone.utc))  # Виправлено
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
-class UserRole(str):
+class UserRole(str, Enum):
     """
     Enumeration of available user roles.
     """
@@ -31,44 +36,55 @@ class UserRole(str):
 class UserBase(BaseModel):
     """
     UserBase schema defines the base structure for user-related data.
-
-    Attributes:
-        email (EmailStr): The email address of the user. Must be a valid email format.
-        is_active (Optional[bool]): Indicates whether the user account is active. Defaults to True.
-        is_verified (Optional[bool]): Indicates whether the user's email is verified. Defaults to False.
-        role (Optional[str]): The role assigned to the user. Defaults to "user".
-
-    Config:
-        orm_mode (bool): Enables compatibility with ORM objects, allowing data to be parsed from ORM models.
     """
 
     email: EmailStr
     is_active: Optional[bool] = True
     is_verified: Optional[bool] = False
-    role: Optional[str] = "user"
+    role: Optional[UserRole] = UserRole.USER
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        arbitrary_types_allowed = True  # Дозволяє кастомні типи
 
 
 class UserCreate(UserBase):
     """
     UserCreate schema extends UserBase and adds a password field for creating new users.
-
-    Attributes:
-        password (str): The password for the user.
     """
 
     password: str
+
+    @validator("password")
+    def validate_password(cls, value: str) -> str:
+        """
+        Validate the password to ensure it meets security requirements.
+
+        Args:
+            value (str): The password to validate.
+
+        Returns:
+            str: The validated password.
+
+        Raises:
+            ValueError: If the password does not meet the requirements.
+        """
+        if len(value) < 8:
+            logger.warning("Password validation failed: too short.")
+            raise ValueError("Password must be at least 8 characters long.")
+        if not any(char.isdigit() for char in value):
+            logger.warning("Password validation failed: no digits.")
+            raise ValueError("Password must contain at least one digit.")
+        if not any(char.isalpha() for char in value):
+            logger.warning("Password validation failed: no letters.")
+            raise ValueError("Password must contain at least one letter.")
+        logger.info("Password validated successfully.")
+        return value
 
 
 class Token(BaseModel):
     """
     Token schema defines the structure for authentication tokens.
-
-    Attributes:
-        access_token (str): The access token string.
-        token_type (str): The type of the token (e.g., "bearer").
     """
 
     access_token: str
@@ -76,6 +92,10 @@ class Token(BaseModel):
 
 
 class UserResponse(BaseModel):
+    """
+    UserResponse schema defines the structure for user response data.
+    """
+
     id: int
     email: str
     is_verified: bool

@@ -1,9 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.contact import ContactCreate, ContactResponse
 from app.models.contacts import Contact
 from app.utils.dependencies import get_db, get_current_user
+import logging
+
+# Налаштування логування
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -16,22 +21,12 @@ def create_contact(
 ):
     """
     Creates a new contact and associates it with the currently authenticated user.
-
-    Args:
-        contact (ContactCreate): The data required to create a new contact.
-        db (Session): The database session dependency.
-        current_user: The currently authenticated user.
-
-    Returns:
-        ContactResponse: The newly created contact object.
-
-    Raises:
-        HTTPException: If there is an issue with the database operation.
     """
     new_contact = Contact(**contact.dict(), owner_id=current_user.id)
     db.add(new_contact)
     db.commit()
     db.refresh(new_contact)
+    logger.info(f"Contact created: {new_contact.id} by user {current_user.id}")
     return new_contact
 
 
@@ -42,15 +37,10 @@ def get_contacts(
 ):
     """
     Retrieves all contacts associated with the currently authenticated user.
-
-    Args:
-        db (Session): The database session dependency.
-        current_user: The currently authenticated user.
-
-    Returns:
-        List[ContactResponse]: A list of contacts belonging to the user.
     """
-    return db.query(Contact).filter(Contact.owner_id == current_user.id).all()
+    contacts = db.query(Contact).filter(Contact.owner_id == current_user.id).all()
+    logger.info(f"Retrieved {len(contacts)} contacts for user {current_user.id}")
+    return contacts
 
 
 @router.get("/{contact_id}", response_model=ContactResponse, status_code=200)
@@ -61,17 +51,6 @@ def get_contact_by_id(
 ):
     """
     Retrieves a specific contact by its ID.
-
-    Args:
-        contact_id (int): The ID of the contact to retrieve.
-        db (Session): The database session dependency.
-        current_user: The currently authenticated user.
-
-    Returns:
-        ContactResponse: The contact object.
-
-    Raises:
-        HTTPException: If the contact is not found or does not belong to the user.
     """
     contact = (
         db.query(Contact)
@@ -79,7 +58,9 @@ def get_contact_by_id(
         .first()
     )
     if not contact:
+        logger.warning(f"Contact {contact_id} not found for user {current_user.id}")
         raise HTTPException(status_code=404, detail="Contact not found")
+    logger.info(f"Retrieved contact {contact_id} for user {current_user.id}")
     return contact
 
 
@@ -92,18 +73,6 @@ def update_contact(
 ):
     """
     Updates a specific contact by its ID.
-
-    Args:
-        contact_id (int): The ID of the contact to update.
-        contact_data (ContactCreate): The updated contact data.
-        db (Session): The database session dependency.
-        current_user: The currently authenticated user.
-
-    Returns:
-        ContactResponse: The updated contact object.
-
-    Raises:
-        HTTPException: If the contact is not found or does not belong to the user.
     """
     contact = (
         db.query(Contact)
@@ -111,11 +80,13 @@ def update_contact(
         .first()
     )
     if not contact:
+        logger.warning(f"Contact {contact_id} not found for user {current_user.id}")
         raise HTTPException(status_code=404, detail="Contact not found")
     for key, value in contact_data.dict().items():
         setattr(contact, key, value)
     db.commit()
     db.refresh(contact)
+    logger.info(f"Contact {contact_id} updated by user {current_user.id}")
     return contact
 
 
@@ -127,17 +98,6 @@ def delete_contact(
 ):
     """
     Deletes a specific contact by its ID.
-
-    Args:
-        contact_id (int): The ID of the contact to delete.
-        db (Session): The database session dependency.
-        current_user: The currently authenticated user.
-
-    Returns:
-        ContactResponse: The deleted contact object.
-
-    Raises:
-        HTTPException: If the contact is not found or does not belong to the user.
     """
     contact = (
         db.query(Contact)
@@ -145,7 +105,52 @@ def delete_contact(
         .first()
     )
     if not contact:
+        logger.warning(f"Contact {contact_id} not found for user {current_user.id}")
         raise HTTPException(status_code=404, detail="Contact not found")
     db.delete(contact)
     db.commit()
+    logger.info(f"Contact {contact_id} deleted by user {current_user.id}")
     return contact
+
+
+@router.get("/search", response_model=List[ContactResponse], status_code=200)
+def search_contacts(
+    query: str = Query(..., description="Search by first name, last name, or email"),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Search contacts by first name, last name, or email.
+    """
+    contacts = (
+        db.query(Contact)
+        .filter(
+            Contact.owner_id == current_user.id,
+            (Contact.first_name.ilike(f"%{query}%"))
+            | (Contact.last_name.ilike(f"%{query}%"))
+            | (Contact.email.ilike(f"%{query}%")),
+        )
+        .all()
+    )
+    return contacts
+
+
+@router.get("/birthdays", response_model=List[ContactResponse], status_code=200)
+def get_upcoming_birthdays(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Get contacts with birthdays in the next 7 days.
+    """
+    today = date.today()
+    next_week = today + timedelta(days=7)
+    contacts = (
+        db.query(Contact)
+        .filter(
+            Contact.owner_id == current_user.id,
+            Contact.birthday.between(today, next_week),
+        )
+        .all()
+    )
+    return contacts

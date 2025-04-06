@@ -1,5 +1,7 @@
 Update Contact
-=============
+==============
+
+This endpoint allows updating an existing contact's details by providing the contact ID and updated fields.
 
 .. http:put:: /contacts/{contact_id}
 
@@ -15,11 +17,13 @@ Update Contact
 
    :status 200: Contact updated successfully
    :status 401: Not authenticated
+   :status 403: Forbidden (if the user does not have access to the contact)
    :status 404: Contact not found
    :status 422: Validation error
 
    **Example Request:**
    .. code-block:: http
+
       PUT /contacts/1
       Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
       Content-Type: application/json
@@ -34,6 +38,7 @@ Update Contact
 
    **Example Response:**
    .. code-block:: json
+
       {
          "id": 1,
          "first_name": "John",
@@ -44,4 +49,12 @@ Update Contact
          "owner_id": 1,
          "created_at": "2024-03-28T10:00:00",
          "updated_at": "2024-03-28T10:30:00"
-      } 
+      }
+
+Notes
+-----
+
+- Only fields provided in the request body will be updated.
+- The `Authorization` header must contain a valid Bearer token.
+- Ensure the user has access to the contact before attempting to update it.
+

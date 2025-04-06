@@ -1,10 +1,10 @@
 Testing Documentation
-====================
+=====================
 
 This section describes how to run tests and check test coverage for the FastAPI Contacts API project.
 
 Test Coverage
-------------
+-------------
 
 The project uses pytest-cov to measure test coverage. Current test coverage:
 
@@ -14,7 +14,7 @@ The project uses pytest-cov to measure test coverage. Current test coverage:
 * Services coverage: 96%
 
 Running Tests
-------------
+-------------
 
 To run the tests, follow these steps:
 
@@ -37,10 +37,10 @@ To run the tests, follow these steps:
       pytest --cov=app --cov-report=html tests/
 
 Test Categories
---------------
+---------------
 
 Authentication Tests
-~~~~~~~~~~~~~~~~~~
+--------------------
 
 Tests for authentication-related functionality:
 
@@ -51,7 +51,7 @@ Tests for authentication-related functionality:
 * Token validation
 
 Contacts Tests
-~~~~~~~~~~~~~
+--------------
 
 Tests for contacts management:
 
@@ -62,7 +62,7 @@ Tests for contacts management:
 * Contact search and filtering
 
 Test Database
-------------
+-------------
 
 The tests use a separate SQLite database to avoid affecting the production database:
 

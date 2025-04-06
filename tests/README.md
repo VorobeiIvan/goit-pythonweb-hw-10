@@ -1,181 +1,96 @@
-# Python Web Application with FastAPI
+# Тестування проекту
 
-## Опис проекту
+## Опис
 
-Цей проект є веб-додатком, створеним за допомогою **FastAPI**. Він включає функціонал для роботи з базою даних, аутентифікації, кешування, інтеграції з Cloudinary, SMTP-сервером та іншими сервісами.
+Ця папка містить тести для перевірки функціональності проекту. Тести охоплюють:
 
----
-
-## Основні функції
-
-- **Аутентифікація**: Реалізовано за допомогою JWT-токенів для забезпечення безпеки.
-- **Робота з базою даних**: Використовується SQLAlchemy для роботи з PostgreSQL або SQLite, що забезпечує гнучкість у виборі бази даних.
-- **Кешування**: Інтеграція з Redis для зменшення навантаження на базу даних і підвищення швидкості роботи.
-- **Завантаження файлів**: Інтеграція з Cloudinary для зберігання та обробки зображень, таких як аватари користувачів.
-- **Відправка email**: Використовується SMTP для відправки листів, наприклад, для підтвердження реєстрації.
-- **Документація API**: Автоматично генерується за допомогою Swagger UI та ReDoc для зручності розробників.
+- API маршрути
+- Моделі бази даних
+- Сервіси
+- Docker-інфраструктуру
+- Документацію
 
 ---
 
-## Вимоги
-
-- **Python**: Версія 3.10 або новіша.
-- **Docker та Docker Compose**: Для запуску проекту в контейнерах.
-- **PostgreSQL**: Рекомендується для продакшн-середовища.
-- **Redis**: Для кешування даних.
-
----
-
-## Установка
-
-### 1. Клонування репозиторію
-```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
-```
-
-### 2. Створення та активація віртуального середовища
-```bash
-python -m venv venv
-source venv/bin/activate  # Для Linux/MacOS
-venv\Scripts\activate     # Для Windows
-```
-
-### 3. Встановлення залежностей
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Налаштування змінних середовища
-- Створіть файл `.env` на основі `.env.example`.
-- Заповніть змінні середовища у файлі `.env`.
-
----
-
-## Запуск проекту
-
-### Локально
-1. Запустіть сервер:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-2. Відкрийте документацію API:
-   - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-   - ReDoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
-
-### Через Docker
-1. Запустіть Docker-контейнери:
-   ```bash
-   docker-compose up --build
-   ```
-2. Відкрийте документацію API:
-   - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-   - ReDoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
-
----
-
-## Тестування
+## Запуск тестів
 
 ### Запуск всіх тестів
+
 ```bash
 pytest
 ```
 
 ### Запуск тестів з покриттям коду
+
 ```bash
 pytest --cov=app
 ```
 
 ### Запуск тестів для конкретної папки
+
 ```bash
-pytest tests/
+pytest tests/<folder_name> // pytest tests/service
+```
+
+### Структура тестів
+
+- Тести розташовані у відповідних папках, що відповідають функціональним модулям проекту.
+- Використовуйте зрозумілі назви для тестових файлів та функцій.
+
+```bash
+tests/
+├── [conftest.py](http://_vscodecontentref_/6)          # Фікстури для тестів
+├── [pytest.ini](http://_vscodecontentref_/7)           # Налаштування pytest
+├── [test_env.py](http://_vscodecontentref_/8)          # Тести для змінних середовища
+├── test_main.py         # Тести для основного файлу [main.py](http://_vscodecontentref_/9)
+├── core/                # Тести для ядра проекту (middleware, routers, exception handlers)
+├── database/            # Тести для бази даних
+├── docker/              # Тести для Docker-інфраструктури
+├── docs/                # Тести для документації
+├── models/              # Тести для моделей бази даних
+├── routers/             # Тести для API маршрутів
+├── schemas/             # Тести для Pydantic схем
+├── services/            # Тести для сервісів
+└── utils/               # Тести для утиліт
+```
+
+### Приклади команд
+
+- Запуск тестів з обмеженням на кількість помилок:
+
+   ```bash
+   pytest --maxfail=5
+   ```
+
+- Запуск тестів без попереджень:
+
+   ```bash
+   pytest --disable-warnings
+   ```
+
+### Генерація звіту про покриття коду
+
+```bash
+pytest --cov=app --cov-report=html
 ```
 
 ---
 
-## Структура проекту
+## Додаткові рекомендації
 
-```plaintext
-.
-├── .env
-├── Dockerfile
-│   # Defines the instructions to build the Docker image for the application.
-├── README.md
-│   # Documentation file with project overview, setup, and usage instructions.
-├── __pycache__
-│   # Directory for Python bytecode cache files.
-├── app
-│   # Main application directory containing core logic and structure.
-│   ├── database
-│   │   # Database connection and initialization logic.
-│   ├── models
-│   │   # ORM models for database tables.
-│   ├── routers
-│   │   # API route definitions for various functionalities.
-│   ├── schemas
-│   │   # Pydantic models for request and response validation.
-│   ├── services
-│   │   # Business logic and service layer implementations.
-│   └── utils
-│       # Utility functions and helper modules.
-├── docker-compose.yml
-│   # Configuration for orchestrating multi-container Docker setups.
-├── docker-entrypoint.sh
-│   # Script for initializing the Docker container.
-├── main.py
-│   # Entry point for the FastAPI application.
-├── requirements.txt
-│   # List of Python dependencies for the project.
-├── test.db
-│   # SQLite database file for testing purposes.
-└── tests
-   # Directory containing test cases for the application.
-   ├── cache
-   │   # Tests for caching functionality.
-   ├── cloudinary
-   │   # Tests for Cloudinary integration.
-   ├── database
-   │   # Tests for database-related functionality.
-   ├── docker
-   │   # Tests for Docker-related functionality.
-   ├── integration
-   │   # Integration tests for application modules.
-   ├── models
-   │   # Tests for ORM models.
-   ├── routers
-   │   # Tests for API route handlers.
-   ├── schemas
-   │   # Tests for Pydantic schemas.
-   ├── services
-   │   # Tests for service layer logic.
-   ├── smtp
-   │   # Tests for SMTP email functionality.
-   ├── utils
-   │   # Tests for utility modules.
-   └── pytest.ini
-      # Configuration file for pytest settings.
+### Перевірка стилю коду
+
+Використовуйте `flake8` для перевірки стилю коду:
+
+```bash
+flake8 app/ tests/
 ```
 
----
+### Автоматизація тестів
 
-## Залежності
+Додайте тести до CI/CD процесу, щоб забезпечити стабільність проекту. Наприклад, використовуйте GitHub Actions або інші інструменти CI/CD.
 
-Перелік основних бібліотек:
-- **FastAPI**: Фреймворк для створення веб-додатків.
-- **SQLAlchemy**: ORM для роботи з базою даних.
-- **Pydantic**: Валідація даних.
-- **Redis**: Кешування.
-- **python-jose**: Робота з JWT.
-- **pytest**: Тестування.
+### Документація
 
----
+Переконайтеся, що всі тести добре задокументовані для зручності інших розробників. Додайте коментарі до складних тестів та пояснення до тестових сценаріїв.
 
-## Автор
-
-- **Ваше ім'я**: [Ваш GitHub профіль](https://github.com/your-username)
-
----
-
-## Ліцензія
-
-Цей проект ліцензований під [MIT License](LICENSE).

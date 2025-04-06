@@ -1,71 +1,61 @@
 import pytest
-from app.services.contact import (
-    create_contact,
-    get_contact_by_id,
-    delete_contact,
-)
-from app.schemas.contact import ContactCreate
-from app.models.contact import Contact
+from pydantic import ValidationError
+from app.schemas.user import UserCreate, UserRole
+from unittest.mock import patch
 
 
-@pytest.fixture
-def test_contact_data():
-    """
-    Фікстура для створення тестових даних контакту.
-    """
-    return {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john.doe@example.com",
-        "phone": "1234567890",
+def test_user_create_valid():
+    data = {
+        "email": "test@example.com",
+        "password": "Password123",
+        "is_active": True,
+        "is_verified": False,
+        "role": UserRole.USER,
     }
+    user = UserCreate(**data)
+    assert user.email == "test@example.com"
+    assert user.password == "Password123"
+    assert user.role == UserRole.USER
 
 
-def test_create_contact(db_session, test_contact_data):
-    """
-    Тест для перевірки створення нового контакту.
-    """
-    contact_data = ContactCreate(**test_contact_data)
-    contact = create_contact(db_session, contact_data)
-
-    assert contact is not None, "Contact creation failed"
-    assert (
-        contact.first_name == test_contact_data["first_name"]
-    ), "First name does not match"
-    assert (
-        contact.last_name == test_contact_data["last_name"]
-    ), "Last name does not match"
-    assert contact.email == test_contact_data["email"], "Email does not match"
-    assert contact.phone == test_contact_data["phone"], "Phone does not match"
+def test_user_create_invalid_password_short():
+    data = {
+        "email": "test@example.com",
+        "password": "short",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        UserCreate(**data)
+    assert "Password must be at least 8 characters long." in str(excinfo.value)
 
 
-def test_get_contact_by_id(db_session, test_contact_data):
-    """
-    Тест для перевірки отримання контакту за ID.
-    """
-    # Спочатку створюємо контакт
-    contact_data = ContactCreate(**test_contact_data)
-    created_contact = create_contact(db_session, contact_data)
-
-    # Потім отримуємо контакт за ID
-    fetched_contact = get_contact_by_id(db_session, created_contact.id)
-
-    assert fetched_contact is not None, "Contact not found"
-    assert fetched_contact.id == created_contact.id, "Contact ID does not match"
-    assert fetched_contact.email == created_contact.email, "Email does not match"
+def test_user_create_invalid_password_no_digit():
+    data = {
+        "email": "test@example.com",
+        "password": "Password",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        UserCreate(**data)
+    assert "Password must contain at least one digit." in str(excinfo.value)
 
 
-def test_delete_contact(db_session, test_contact_data):
-    """
-    Тест для перевірки видалення контакту.
-    """
-    # Спочатку створюємо контакт
-    contact_data = ContactCreate(**test_contact_data)
-    created_contact = create_contact(db_session, contact_data)
+def test_user_create_invalid_password_no_letter():
+    data = {
+        "email": "test@example.com",
+        "password": "12345678",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        UserCreate(**data)
+    assert "Password must contain at least one letter." in str(excinfo.value)
 
-    # Видаляємо контакт
-    delete_contact(db_session, created_contact.id)
 
-    # Перевіряємо, що контакт видалено
-    deleted_contact = get_contact_by_id(db_session, created_contact.id)
-    assert deleted_contact is None, "Contact was not deleted"
+@patch("app.schemas.user.logger")
+def test_user_create_logging_password(mock_logger):
+    data = {
+        "email": "test@example.com",
+        "password": "short",
+    }
+    with pytest.raises(ValidationError):
+        UserCreate(**data)
+    mock_logger.warning.assert_called_once_with(
+        "Password validation failed: too short."
+    )

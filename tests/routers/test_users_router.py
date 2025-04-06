@@ -1,54 +1,97 @@
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
+from unittest.mock import MagicMock, patch
+from app.models.user import User
 
 client = TestClient(app)
 
 
-@pytest.fixture
-def test_user_data():
-    """
-    Фікстура для створення тестових даних користувача.
-    """
-    return {
-        "email": "testuser@example.com",
-        "password": "securepassword",
-        "first_name": "John",
-        "last_name": "Doe",
-    }
+@patch("app.routers.users.get_db")
+def test_register_user_success(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_db.query.return_value.filter.return_value.first.return_value = None
+
+    response = client.post(
+        "/register/",
+        json={
+            "email": "test@example.com",
+            "password": "Password123",
+            "role": "user",
+        },
+    )
+    assert response.status_code == 201
+    assert response.json()["email"] == "test@example.com"
 
 
-def test_get_current_user(test_user_data):
-    """
-    Тест для перевірки отримання поточного користувача.
-    """
-    # Спочатку реєструємо користувача
-    register_response = client.post("/auth/register", json=test_user_data)
-    assert register_response.status_code == 201, "User registration failed"
+@patch("app.routers.users.get_db")
+def test_register_user_already_exists(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
 
-    # Логін користувача
-    login_response = client.post("/auth/login", data=test_user_data)
-    assert login_response.status_code == 200, "User login failed"
-    access_token = login_response.json()["access_token"]
+    mock_db.query.return_value.filter.return_value.first.return_value = User(
+        email="test@example.com"
+    )
 
-    # Отримання поточного користувача
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.get("/users/me", headers=headers)
-    assert response.status_code == 200, "Failed to fetch current user"
-    data = response.json()
-    assert data["email"] == test_user_data["email"], "Email does not match"
-    assert (
-        data["first_name"] == test_user_data["first_name"]
-    ), "First name does not match"
-    assert data["last_name"] == test_user_data["last_name"], "Last name does not match"
+    response = client.post(
+        "/register/",
+        json={
+            "email": "test@example.com",
+            "password": "Password123",
+            "role": "user",
+        },
+    )
+    assert response.status_code == 409
+    assert response.json()["detail"] == "User already exists"
 
 
-def test_get_current_user_unauthorized():
-    """
-    Тест для перевірки отримання поточного користувача без авторизації.
-    """
-    response = client.get("/users/me")
-    assert response.status_code == 401, "Unauthorized request should return 401"
-    assert (
-        response.json()["detail"] == "Not authenticated"
-    ), "Error message does not match"
+@patch("app.routers.users.get_db")
+def test_register_user_invalid_data(mock_get_db):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    response = client.post(
+        "/register/",
+        json={
+            "email": "invalid_email",  # Некоректний email
+            "password": "Password123",
+            "role": "user",
+        },
+    )
+    assert response.status_code == 422  # Unprocessable Entity
+
+
+@patch("app.routers.users.get_current_user")
+def test_get_current_user_info(mock_get_current_user):
+    mock_user = MagicMock()
+    mock_user.email = "test@example.com"
+    mock_user.is_verified = True
+    mock_user.id = 1
+    mock_get_current_user.return_value = mock_user
+
+    response = client.get("/me/")
+    assert response.status_code == 200
+    assert response.json()["email"] == "test@example.com"
+
+
+@patch("app.routers.users.get_current_user")
+def test_admin_access(mock_get_current_user):
+    mock_user = MagicMock()
+    mock_user.role = "admin"
+    mock_get_current_user.return_value = mock_user
+
+    response = client.get("/admin/dashboard")
+    assert response.status_code == 200
+
+
+@patch("app.routers.users.get_current_user")
+def test_user_access_denied(mock_get_current_user):
+    mock_user = MagicMock()
+    mock_user.role = "user"
+    mock_get_current_user.return_value = mock_user
+
+    response = client.get("/admin/dashboard")
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Access forbidden"}

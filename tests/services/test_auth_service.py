@@ -1,69 +1,44 @@
-import pytest
-from app.services.auth import create_access_token, verify_access_token
+from app.services.auth import (
+    verify_password,
+    get_password_hash,
+    authenticate_user,
+    create_access_token,
+)
+from unittest.mock import MagicMock
 from datetime import timedelta
-from jose import JWTError
+from jose import jwt
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
+ALGORITHM = "HS256"
 
 
-@pytest.fixture
-def secret_key():
-    """
-    Фікстура для секретного ключа.
-    """
-    return "test_secret_key"
+def test_verify_password():
+    password = "my_password"
+    hashed_password = get_password_hash(password)
+    assert verify_password(password, hashed_password) is True
+    assert verify_password("wrong_password", hashed_password) is False
 
 
-@pytest.fixture
-def algorithm():
-    """
-    Фікстура для алгоритму шифрування.
-    """
-    return "HS256"
+def test_authenticate_user():
+    mock_db = MagicMock()
+    mock_user = MagicMock()
+    mock_user.email = "test@example.com"
+    mock_user.hashed_password = get_password_hash("my_password")
+    mock_db.query.return_value.filter.return_value.first.return_value = mock_user
+
+    user = authenticate_user(mock_db, "test@example.com", "my_password")
+    assert user.email == "test@example.com"
+
+    user = authenticate_user(mock_db, "test@example.com", "wrong_password")
+    assert user is None
+
+    user = authenticate_user(mock_db, "notfound@example.com", "my_password")
+    assert user is None
 
 
-@pytest.fixture
-def test_user_email():
-    """
-    Фікстура для тестового email користувача.
-    """
-    return "test@example.com"
-
-
-def test_create_access_token(secret_key, algorithm, test_user_email):
-    """
-    Тест для перевірки створення JWT токена.
-    """
-    token = create_access_token(
-        data={"sub": test_user_email},
-        secret_key=secret_key,
-        algorithm=algorithm,
-        expires_delta=timedelta(minutes=15),
-    )
-    assert token is not None, "Access token was not created"
-    assert isinstance(token, str), "Access token should be a string"
-
-
-def test_verify_access_token(secret_key, algorithm, test_user_email):
-    """
-    Тест для перевірки валідації JWT токена.
-    """
-    # Створюємо токен
-    token = create_access_token(
-        data={"sub": test_user_email},
-        secret_key=secret_key,
-        algorithm=algorithm,
-        expires_delta=timedelta(minutes=15),
-    )
-
-    # Перевіряємо токен
-    payload = verify_access_token(token, secret_key=secret_key, algorithm=algorithm)
-    assert payload is not None, "Payload should not be None"
-    assert payload.get("sub") == test_user_email, "Email in payload does not match"
-
-
-def test_verify_access_token_invalid(secret_key, algorithm):
-    """
-    Тест для перевірки валідації невалідного JWT токена.
-    """
-    invalid_token = "invalid.token.value"
-    with pytest.raises(JWTError):
-        verify_access_token(invalid_token, secret_key=secret_key, algorithm=algorithm)
+def test_create_access_token():
+    data = {"sub": "test@example.com"}
+    token = create_access_token(data, expires_delta=timedelta(minutes=15))
+    decoded_data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    assert decoded_data["sub"] == "test@example.com"

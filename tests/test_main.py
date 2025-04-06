@@ -1,33 +1,48 @@
 from fastapi.testclient import TestClient
 from main import app
+from unittest.mock import patch
 
 client = TestClient(app)
 
 
-def test_root_endpoint():
+def test_health_check():
     """
-    Тест для перевірки кореневого маршруту.
+    Test the /health endpoint.
     """
-    response = client.get("/")
-    assert response.status_code == 200, "Root endpoint did not return status 200"
-    assert response.json() == {
-        "message": "Welcome to the FastAPI Contacts Management API"
-    }, "Unexpected response content"
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
 
-def test_docs_swagger_ui():
+@patch("main.initialize_database")
+def test_startup_event(mock_initialize_database):
     """
-    Тест для перевірки доступності Swagger UI.
+    Test that the startup event initializes the database.
     """
-    response = client.get("/docs")
-    assert response.status_code == 200, "Swagger UI is not accessible"
-    assert "Swagger UI" in response.text, "Swagger UI page content is missing"
+    with TestClient(app) as client:
+        # Startup event is triggered when TestClient is initialized
+        mock_initialize_database.assert_called_once()
 
 
-def test_docs_redoc():
+def test_middlewares():
     """
-    Тест для перевірки доступності ReDoc.
+    Test that all middlewares are added to the application.
     """
-    response = client.get("/redoc")
-    assert response.status_code == 200, "ReDoc is not accessible"
-    assert "ReDoc" in response.text, "ReDoc page content is missing"
+    middleware_classes = [middleware.cls for middleware in app.user_middleware]
+    from fastapi.middleware.cors import CORSMiddleware
+    from slowapi.middleware import SlowAPIMiddleware
+
+    assert CORSMiddleware in middleware_classes
+    assert SlowAPIMiddleware in middleware_classes
+
+
+def test_routers():
+    """
+    Test that all routers are added to the application.
+    """
+    routes = [route.path for route in app.routes]
+
+    # Example routes from the routers
+    assert "/auth/token" in routes  # From auth router
+    assert "/contacts/" in routes  # From contacts router
+    assert "/users/" in routes  # From users router

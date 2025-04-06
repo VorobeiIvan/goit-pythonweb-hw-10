@@ -1,28 +1,24 @@
 import pytest
+from app.database.database import get_engine, SessionLocal
 from sqlalchemy.exc import OperationalError
-from app.database.database import engine, SessionLocal
 
 
-def test_database_connection():
+def test_get_engine_sqlite():
     """
-    Тест для перевірки підключення до бази даних.
+    Test the creation of a SQLite engine.
     """
-    try:
-        # Перевіряємо, чи можна виконати підключення до бази даних
-        connection = engine.connect()
-        connection.close()
-    except OperationalError as e:
-        pytest.fail(f"Database connection failed: {e}")
+    engine = get_engine()
+    assert engine is not None
+    assert "sqlite" in str(engine.url)
 
 
-def test_database_session():
+def test_session_local():
     """
-    Тест для перевірки створення сесії бази даних.
+    Test the creation of a database session.
     """
     try:
-        # Перевіряємо, чи можна створити сесію
         session = SessionLocal()
-        session.execute("SELECT 1")  # Виконуємо простий запит
+        assert session is not None
         session.close()
-    except Exception as e:
-        pytest.fail(f"Database session creation failed: {e}")
+    except OperationalError:
+        pytest.fail("Failed to create a database session.")

@@ -1,13 +1,3 @@
-.. FastAPI Contacts API documentation master file, created by
-   sphinx-quickstart on Fri Mar 28 08:22:37 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to FastAPI Contacts API's documentation!
-===============================================
-
-This is the documentation for the FastAPI Contacts API project.
-
 Contents
 --------
 
@@ -20,6 +10,14 @@ Contents
    models
    main
    testing
+   auth/reset-password
+   auth/verify
+   auth/avatar
+   contacts/create
+   contacts/read
+   contacts/update
+   contacts/delete
+   users/profile
 
 Installation
 ------------
@@ -46,35 +44,10 @@ To get started with the FastAPI Contacts API, follow these steps:
 
       pip install -r requirements.txt
 
-API Documentation
-----------------
+4. Run the application:
 
-The API documentation is organized into the following sections:
+   .. code-block:: bash
 
-* Authentication
-* Contacts Management
-* User Profile
-* Avatar Management
+      uvicorn main:app --reload
 
-For detailed information about each endpoint, please refer to the :doc:`api` section.
 
-Features
---------
-
-* User Authentication and Authorization
-* Contact Management (CRUD operations)
-* Email Verification
-* Password Reset Functionality
-* User Roles (Admin/User)
-
-Testing
--------
-
-For information about testing, please refer to the :doc:`testing` section.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

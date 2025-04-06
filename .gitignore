@@ -1,19 +1,43 @@
-.idea
-.venv
+# Системні файли
+.idea/
+.vscode/
 __pycache__/
-.env
-
-# Sphinx documentation
-docs/_build/
-docs/_static/
-docs/_templates/
 *.pyc
 *.pyo
 *.pyd
-.Python
+.DS_Store
+*.log
+
+# Віртуальне середовище
+.venv/
+env/
+venv/
+
+# Файли конфігурації
+.env
+
+# Git
+.git/
+.gitignore
+
+# Тести та покриття
+tests/__pycache__/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Документація
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Інші файли
+*.egg-info/
+dist/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -23,21 +47,6 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 MANIFEST
-
-# Coverage
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-
-*.pot
-*.mo
-*.po
-.DS_Store
-*.log
-
+*.egg
+.installed.cfg

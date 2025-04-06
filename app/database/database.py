@@ -1,47 +1,55 @@
 import os
+import logging
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import StaticPool
 from dotenv import load_dotenv
 
+# Завантаження змінних середовища
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite://")
+# Налаштування логування
+logger = logging.getLogger(__name__)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    logger.error("DATABASE_URL is not set in the environment variables.")
+    raise ValueError("DATABASE_URL is not set in the environment variables.")
 
 
 def get_engine():
     """
-    Create and return a SQLAlchemy engine instance.
+    Create and return a SQLAlchemy engine based on the DATABASE_URL.
 
     Returns:
-        Engine: SQLAlchemy engine instance configured with the appropriate database URL.
-        For testing, uses SQLite in-memory database. For production, uses PostgreSQL.
+        Engine: SQLAlchemy engine instance.
+
+    Raises:
+        Exception: If the engine creation fails.
     """
-    if DATABASE_URL == "sqlite://":
-        return create_engine(
-            DATABASE_URL,
-            connect_args={"check_same_thread": False},
-            poolclass=StaticPool,
-        )
-    return create_engine(DATABASE_URL)
+    try:
+        if DATABASE_URL.startswith("sqlite://"):
+            logger.info("Using SQLite database.")
+            return create_engine(
+                DATABASE_URL,
+                connect_args={"check_same_thread": False},
+                poolclass=StaticPool,
+            )
+        logger.info("Using non-SQLite database.")
+        return create_engine(DATABASE_URL)
+    except Exception as e:
+        logger.error(f"Failed to create database engine: {e}")
+        raise
 
 
-engine = get_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Ініціалізація бази даних
+try:
+    engine = get_engine()
+    logger.info("Database engine created successfully.")
+except Exception as e:
+    logger.critical(f"Failed to initialize database engine: {e}")
+    raise
 
 Base = declarative_base()
-
-
-def get_db():
-    """
-    Dependency function to get a database session.
-
-    Yields:
-        Session: SQLAlchemy database session.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
