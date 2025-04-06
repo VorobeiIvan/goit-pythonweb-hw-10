@@ -2,6 +2,8 @@ import smtplib
 from email.message import EmailMessage
 import os
 
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+
 
 def send_verification_email(email: str, token: str):
     """
@@ -11,7 +13,7 @@ def send_verification_email(email: str, token: str):
         email (str): The recipient's email address.
         token (str): The verification token.
     """
-    verification_url = f"http://localhost:8000/verify/{token}"
+    verification_url = f"{BASE_URL}/verify/{token}"
     msg = EmailMessage()
     msg["Subject"] = "Verify your email"
     msg["From"] = os.getenv("SMTP_EMAIL")
@@ -34,7 +36,7 @@ def send_password_reset_email(email: str, token: str):
         email (str): The recipient's email address.
         token (str): The password reset token.
     """
-    reset_url = f"http://localhost:8000/reset-password/{token}"
+    reset_url = f"{BASE_URL}/reset-password/{token}"
     msg = EmailMessage()
     msg["Subject"] = "Reset your password"
     msg["From"] = os.getenv("SMTP_EMAIL")

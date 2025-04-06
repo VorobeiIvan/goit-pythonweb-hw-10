@@ -8,7 +8,7 @@ from app.utils.dependencies import get_db, get_current_user
 router = APIRouter()
 
 
-@router.post("/", response_model=ContactResponse)
+@router.post("/", response_model=ContactResponse, status_code=201)
 def create_contact(
     contact: ContactCreate,
     db: Session = Depends(get_db),

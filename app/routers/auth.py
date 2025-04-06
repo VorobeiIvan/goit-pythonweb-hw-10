@@ -28,6 +28,10 @@ def login(
     """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials. Please check your email and password.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
