@@ -44,4 +44,3 @@ class User(Base):
     contacts = relationship("Contact", back_populates="owner")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    avatar = Column(String, nullable=True)

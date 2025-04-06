@@ -35,7 +35,7 @@ def create_contact(
     return new_contact
 
 
-@router.get("/", response_model=List[ContactResponse])
+@router.get("/", response_model=List[ContactResponse], status_code=200)
 def get_contacts(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -53,7 +53,7 @@ def get_contacts(
     return db.query(Contact).filter(Contact.owner_id == current_user.id).all()
 
 
-@router.get("/{contact_id}", response_model=ContactResponse)
+@router.get("/{contact_id}", response_model=ContactResponse, status_code=200)
 def get_contact_by_id(
     contact_id: int,
     db: Session = Depends(get_db),
@@ -83,7 +83,7 @@ def get_contact_by_id(
     return contact
 
 
-@router.put("/{contact_id}", response_model=ContactResponse)
+@router.put("/{contact_id}", response_model=ContactResponse, status_code=200)
 def update_contact(
     contact_id: int,
     contact_data: ContactCreate,
@@ -119,7 +119,7 @@ def update_contact(
     return contact
 
 
-@router.delete("/{contact_id}", response_model=ContactResponse)
+@router.delete("/{contact_id}", response_model=ContactResponse, status_code=200)
 def delete_contact(
     contact_id: int,
     db: Session = Depends(get_db),
