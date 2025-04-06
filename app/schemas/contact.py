@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 from datetime import date
 import logging
@@ -27,7 +27,7 @@ class ContactCreate(BaseModel):
     birthday: date
     additional_info: Optional[str] = None
 
-    @validator("birthday")
+    @field_validator("birthday")
     def validate_birthday(cls, value: date) -> date:
         """
         Validate that the birthday is not in the future.
@@ -47,7 +47,7 @@ class ContactCreate(BaseModel):
         logger.info(f"Validated birthday: {value}")
         return value
 
-    @validator("phone")
+    @field_validator("phone")
     def validate_phone(cls, value: str) -> str:
         """
         Validate the phone number format.
@@ -80,5 +80,5 @@ class ContactResponse(ContactCreate):
 
     id: int
 
-    class Config:
+    class ConfigDict:
         from_attributes = True

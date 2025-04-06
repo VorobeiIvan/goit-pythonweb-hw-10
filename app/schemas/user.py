@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
@@ -43,7 +43,7 @@ class UserBase(BaseModel):
     is_verified: Optional[bool] = False
     role: Optional[UserRole] = UserRole.USER
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
         arbitrary_types_allowed = True  # Дозволяє кастомні типи
 
@@ -55,7 +55,7 @@ class UserCreate(UserBase):
 
     password: str
 
-    @validator("password")
+    @field_validator("password")
     def validate_password(cls, value: str) -> str:
         """
         Validate the password to ensure it meets security requirements.
@@ -100,5 +100,5 @@ class UserResponse(BaseModel):
     email: str
     is_verified: bool
 
-    class Config:
+    class ConfigDict:
         from_attributes = True

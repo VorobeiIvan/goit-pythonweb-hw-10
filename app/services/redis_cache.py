@@ -3,27 +3,13 @@ import os
 import json
 from datetime import timedelta
 
-# Redis configuration
-redis_client = redis.Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", 6379)),
-    db=0,
-    decode_responses=True,
-)
+import redis
+
+redis_client = redis.StrictRedis(host="localhost", port=6379, db=0)
 
 
-def cache_user(email: str, user_data: dict, expiration_minutes: int = 30):
-    """
-    Cache user data in Redis.
-
-    Args:
-        email (str): The user's email address (used as the key).
-        user_data (dict): The user data to cache.
-        expiration_minutes (int): Expiration time in minutes (default is 30).
-    """
-    redis_client.setex(
-        f"user:{email}", timedelta(minutes=expiration_minutes), json.dumps(user_data)
-    )
+def cache_user(user_id, user_data):
+    redis_client.set(f"user:{user_id}", user_data)
 
 
 def get_cached_user(email: str) -> dict:

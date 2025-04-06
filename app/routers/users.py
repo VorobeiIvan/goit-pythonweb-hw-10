@@ -1,16 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import List
 from sqlalchemy.orm import Session
+
 from app.schemas.user import UserCreate, UserResponse
 from app.models.user import User
 from app.services.auth import get_password_hash
 from app.utils.dependencies import get_current_user, get_db
 from app.utils.limiter import limiter
+
 import logging
 
-# Налаштування логування
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags=["users"],
+)
+
+
+@router.get("/", response_model=List[UserResponse], status_code=200)
+async def list_users():
+    """
+    Повертає список користувачів (заглушка).
+    """
+    return []
 
 
 @router.post("/register/", response_model=UserResponse, status_code=201)
@@ -18,23 +31,10 @@ router = APIRouter()
 def register_user(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user.
-
-    Args:
-        request (Request): The HTTP request object.
-        user (UserCreate): The user data for registration.
-        db (Session): The database session.
-
-    Returns:
-        UserResponse: The created user data.
-
-    Raises:
-        HTTPException: If the user already exists.
     """
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
-        logger.warning(
-            f"Registration failed: User with email {user.email} already exists."
-        )
+        logger.warning(f"Registration failed: User {user.email} already exists.")
         raise HTTPException(status_code=409, detail="User already exists")
 
     hashed_password = get_password_hash(user.password)
@@ -60,14 +60,6 @@ def get_current_user_info(
 ):
     """
     Get the current authenticated user's information.
-
-    Args:
-        request (Request): The HTTP request object.
-        db (Session): The database session.
-        current_user: The currently authenticated user.
-
-    Returns:
-        UserResponse: The current user's data.
     """
     logger.info(f"Retrieved current user info: {current_user.email}")
     return current_user

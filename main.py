@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.core.middleware import add_middlewares
 from app.core.exception_handlers import add_exception_handlers
 from app.core.routers import add_routers
@@ -9,16 +10,21 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Ініціалізація FastAPI
-app = FastAPI()
 
-
-# Подія для створення таблиць у базі даних під час запуску
-@app.on_event("startup")
-async def startup():
+# Створення Lifespan менеджера
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     logger.info("Starting application...")
     initialize_database()
     logger.info("Application started successfully.")
+    yield
+    logger.info(
+        "Shutting down application..."
+    )  # Логування при завершенні роботи додатка
+
+
+# Ініціалізація FastAPI з Lifespan
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/health")

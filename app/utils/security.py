@@ -32,9 +32,42 @@ def get_password_hash(password: str) -> str:
     return hashed_password
 
 
+def create_access_token(data: dict) -> str:
+    """
+    Create an access token with a shorter expiration time (e.g. 15 minutes).
+    """
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=15)  # Access токен діє 15 хвилин
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+    logger.info("Access token created successfully.")
+    return encoded_jwt
+
+
+def verify_access_token(token: str) -> str:
+    """
+    Verify the access token and return the email if valid.
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        email: str = payload.get("sub")
+        if email is None:
+            logger.warning("Access token verification failed: no email found.")
+            return None
+        logger.info("Access token verified successfully.")
+        return email
+    except JWTError as e:
+        logger.error(f"Access token verification failed: {e}")
+        return None
+
+
 def create_refresh_token(data: dict) -> str:
     """
-    Create a refresh token with a longer expiration time.
+    Create a refresh token with a longer expiration time (1 day).
     """
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=1)  # Refresh токен діє 1 день

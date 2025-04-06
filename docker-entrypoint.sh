@@ -7,12 +7,24 @@ if [ -z "${POSTGRES_SERVER}" ] || [ -z "${POSTGRES_PORT}" ]; then
     exit 1
 fi
 
+# Перевірка наявності pg_isready
+if ! command -v pg_isready &> /dev/null; then
+    echo "Error: pg_isready command not found. Please install PostgreSQL client tools."
+    exit 1
+fi
+
 # Перевірка доступності PostgreSQL
 echo "Waiting for PostgreSQL to start..."
 until pg_isready -h ${POSTGRES_SERVER} -p ${POSTGRES_PORT} -U ${POSTGRES_USER}; do
     sleep 1
 done
 echo "PostgreSQL is up and running!"
+
+# Якщо запускається для тестів, виконуємо pytest
+if [ "$1" = "pytest" ]; then
+    echo "Running tests..."
+    exec pytest "${@:2}"
+fi
 
 # Запуск сервера документації (у фоновому режимі)
 if [ -d "docs/_build/html" ]; then
